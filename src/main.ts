@@ -28,6 +28,7 @@ const init = async () => {
       width: window.innerWidth,
       height: window.innerHeight,
       wireframes: false,
+      background: "rgb(0 4 21)",
     },
   });
 
