@@ -18,6 +18,7 @@ import {
 Common._seed = Math.random();
 const width = 700;
 const height = 1000;
+const isFloorBouncing = false;
 
 const init = async () => {
   const engine = Engine.create();
@@ -50,11 +51,12 @@ const init = async () => {
       Common.random(-height, 0),
       [vertices],
       {
+        restitution: 0.6,
         render: {
           sprite: {
             texture,
-            xScale: 0.5,
-            yScale: 0.5,
+            xScale: 0.25,
+            yScale: 0.25,
           },
         },
       }
@@ -68,9 +70,10 @@ const init = async () => {
       Bodies.circle(
         Common.random(0, width),
         Common.random(0, -height),
-        Common.random(10, 50),
+        Common.random(20, 50),
         {
           render: { fillStyle: "white" },
+          restitution: 0.6,
         }
       )
     );
@@ -82,8 +85,7 @@ const init = async () => {
   const floor = Bodies.rectangle(width / 2, height * 1.5, width, height, {
     isStatic: true,
     render: { visible: false },
-    angularSpeed: 0,
-    inertia: Infinity,
+    restitution: 0.6,
   });
 
   Composite.add(engine.world, [
@@ -92,11 +94,13 @@ const init = async () => {
       isStatic: true,
       render: { visible: false },
       friction: 0,
+      restitution: 0.6,
     }),
     Bodies.rectangle(-width * 0.5, 0, width, height * 4, {
       isStatic: true,
       render: { visible: false },
       friction: 0,
+      restitution: 0.6,
     }),
   ]);
 
@@ -113,21 +117,28 @@ const init = async () => {
       }
     });
 
-    const bounceAmount = Math.sin(engine.timing.timestamp * 0.0005) * 0.5 + 0.5;
-    const bouncePhase = Math.sin(engine.timing.timestamp * 0.002);
+    if (isFloorBouncing) {
+      const bounceAmount =
+        Math.sin(engine.timing.timestamp * 0.0005) * 0.5 + 0.5;
+      const bouncePhase = Math.sin(engine.timing.timestamp * 0.002);
 
-    Body.setPosition(
-      floor,
-      {
-        x: width / 2,
-        y: height * 1.5 + bounceAmount * (height * (bouncePhase + 1)),
-      },
-      // @ts-expect-error -- types don't want you to know this exists, but it's essential
-      true
-    );
+      Body.setPosition(
+        floor,
+        {
+          x: width / 2,
+          y: height * 1.5 + bounceAmount * (height * (bouncePhase + 1)),
+        },
+        // @ts-expect-error -- types don't want you to know this exists, but it's essential
+        true
+      );
+    }
   });
 
   const mouse = Mouse.create(render.canvas);
+  // @ts-expect-error -- types don't want you to know this exists, but it's essential
+  render.canvas.removeEventListener("wheel", mouse.mousewheel);
+  // @ts-expect-error -- types don't want you to know this exists, but it's essential
+  render.canvas.removeEventListener("DOMMouseScroll", mouse.mousewheel);
   const mouseConstraint = MouseConstraint.create(engine, {
     mouse: mouse,
     constraint: { stiffness: 0.2, render: { visible: false } },
@@ -135,9 +146,21 @@ const init = async () => {
   Composite.add(engine.world, mouseConstraint);
   render.mouse = mouse;
 
+  const aspectRatio = window.innerWidth / window.innerHeight;
+
   Render.lookAt(render, {
-    min: { x: 0, y: height / 2 },
+    min: { x: 0, y: height - width / aspectRatio },
     max: { x: width, y: height },
+  });
+
+  window.addEventListener("resize", () => {
+    const aspectRatio = window.innerWidth / window.innerHeight;
+    render.options.width = render.canvas.width = window.innerWidth;
+    render.options.height = render.canvas.height = window.innerHeight;
+    Render.lookAt(render, {
+      min: { x: 0, y: height - width / aspectRatio },
+      max: { x: width, y: height },
+    });
   });
 };
 
