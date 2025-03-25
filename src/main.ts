@@ -18,7 +18,8 @@ import {
 Common._seed = Math.random();
 const isMobile = window.innerWidth < 831;
 const width = isMobile ? 300 : 700;
-const height = 1000;
+const aspectRatio = window.innerWidth / window.innerHeight;
+const height = width / aspectRatio;
 const isFloorBouncing = isMobile;
 
 const init = async () => {
@@ -127,7 +128,7 @@ const init = async () => {
         floor,
         {
           x: width / 2,
-          y: height * 1.5 + bounceAmount * (height * (bouncePhase + 1)),
+          y: height * 1.5 + bounceAmount * (2 * height * (bouncePhase + 1)),
         },
         // @ts-expect-error -- types don't want you to know this exists, but it's essential
         true
