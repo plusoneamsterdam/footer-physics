@@ -16,9 +16,10 @@ import {
 
 // @ts-expect-error -- _seed is internal, but we still use it for randomization
 Common._seed = Math.random();
-const width = 700;
+const isMobile = window.innerWidth < 831;
+const width = isMobile ? 300 : 700;
 const height = 1000;
-const isFloorBouncing = false;
+const isFloorBouncing = isMobile;
 
 const init = async () => {
   const engine = Engine.create();
