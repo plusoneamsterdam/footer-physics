@@ -1,10 +1,7 @@
-import "pathseg";
-
 import {
   Engine,
   Render,
   Runner,
-  Svg,
   Common,
   MouseConstraint,
   Mouse,
@@ -22,6 +19,8 @@ const aspectRatio = window.innerWidth / window.innerHeight;
 const height = width / aspectRatio;
 const isFloorBouncing = isMobile;
 
+import { letters } from "./letters";
+
 const init = async () => {
   const engine = Engine.create();
   const render = Render.create({
@@ -37,15 +36,6 @@ const init = async () => {
 
   Render.run(render);
   Runner.run(Runner.create(), engine);
-
-  const letters = [
-    ...new window.DOMParser()
-      .parseFromString(await (await fetch("/logo.svg")).text(), "image/svg+xml")
-      .querySelectorAll("path"),
-  ].map((path, i) => ({
-    vertices: Svg.pathToVertices(path, 2),
-    texture: `/${["P", "l", "u", "s", "O", "n", "e", "R"][i]}.png`,
-  }));
 
   const letterBodies = [...letters].map(({ vertices, texture }) => {
     return Bodies.fromVertices(
