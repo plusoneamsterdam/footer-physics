@@ -1,7 +1,7 @@
 {
   "name": "footer-physics",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,8 +14,6 @@
   },
   "dependencies": {
     "@types/matter-js": "^0.19.8",
-    "matter-js": "^0.20.0",
-    "pathseg": "^1.2.1",
-    "poly-decomp": "^0.3.0"
+    "matter-js": "^0.20.0"
   }
 }
