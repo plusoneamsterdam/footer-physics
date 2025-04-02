@@ -17,7 +17,7 @@ const isMobile = window.innerWidth < 831;
 const width = isMobile ? 300 : 700;
 const aspectRatio = window.innerWidth / window.innerHeight;
 const height = width / aspectRatio;
-const isFloorBouncing = isMobile;
+const isFloorBouncing = false;
 
 import { letters } from "./letters";
 
@@ -40,7 +40,7 @@ const init = async () => {
   const letterBodies = [...letters].map(({ vertices, texture }) => {
     return Bodies.fromVertices(
       Common.random(0, width),
-      Common.random(-height, 0),
+      Common.random(isMobile ? height : -height, 0),
       [vertices],
       {
         restitution: 0.6,
@@ -61,7 +61,7 @@ const init = async () => {
     circles.push(
       Bodies.circle(
         Common.random(0, width),
-        Common.random(0, -height),
+        Common.random(0, isMobile ? height : -height),
         Common.random(20, 50),
         {
           render: { fillStyle: "white" },
@@ -79,9 +79,15 @@ const init = async () => {
     render: { visible: false },
     restitution: 0.6,
   });
+  const ceiling = Bodies.rectangle(width / 2, -height * 0.5, width, height, {
+    isStatic: true,
+    // render: { visible: false },
+    restitution: 0.6,
+  });
 
   Composite.add(engine.world, [
     floor,
+    ...(isMobile ? [ceiling] : []),
     Bodies.rectangle(width * 1.5, 0, width, height * 4, {
       isStatic: true,
       render: { visible: false },
@@ -143,6 +149,28 @@ const init = async () => {
   Render.lookAt(render, {
     min: { x: 0, y: height - width / aspectRatio },
     max: { x: width, y: height },
+  });
+
+  window.addEventListener("deviceorientation", (event) => {
+    var orientation =
+        typeof window.orientation !== "undefined" ? window.orientation : 0,
+      gravity = engine.gravity;
+
+    if (!event.gamma || !event.beta) return;
+
+    if (orientation === 0) {
+      gravity.x = Common.clamp(event.gamma, -90, 90) / 90;
+      gravity.y = Common.clamp(event.beta, -90, 90) / 90;
+    } else if (orientation === 180) {
+      gravity.x = Common.clamp(event.gamma, -90, 90) / 90;
+      gravity.y = Common.clamp(-event.beta, -90, 90) / 90;
+    } else if (orientation === 90) {
+      gravity.x = Common.clamp(event.beta, -90, 90) / 90;
+      gravity.y = Common.clamp(-event.gamma, -90, 90) / 90;
+    } else if (orientation === -90) {
+      gravity.x = Common.clamp(-event.beta, -90, 90) / 90;
+      gravity.y = Common.clamp(event.gamma, -90, 90) / 90;
+    }
   });
 
   window.addEventListener("resize", () => {
