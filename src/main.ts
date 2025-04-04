@@ -70,7 +70,7 @@ Composite.add(engine.world, [
       [vertices],
       {
         restitution: 0.6,
-        render: { sprite: { texture, xScale: 0.25, yScale: 0.25 } },
+        render: { sprite: { texture, xScale: 0.125, yScale: 0.125 } },
       }
     )
   ),
