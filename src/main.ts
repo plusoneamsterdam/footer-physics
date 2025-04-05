@@ -7,6 +7,8 @@ import {
   Mouse,
   Composite,
   Bodies,
+  Events,
+  Query,
 } from "matter-js";
 import { letters } from "./letters";
 
@@ -47,22 +49,7 @@ render.mouse = mouse;
 
 // @ts-expect-error -- _seed is internal, but we still use it for randomization
 Common._seed = Math.random();
-Composite.add(engine.world, [
-  MouseConstraint.create(engine, {
-    mouse,
-    constraint: { stiffness: 0.2, render: { visible: false } },
-  }),
-  ...[
-    [width / 2, height * 1.5, height],
-    [width * 1.5, 0, height * 4],
-    [-width * 0.5, 0, height * 4],
-  ].map(([x, y, height]) =>
-    Bodies.rectangle(x, y, width, height, {
-      isStatic: true,
-      render: { visible: false },
-      restitution: 0.6,
-    })
-  ),
+const interactiveBodies = [
   ...letters.map(({ vertices, texture }) =>
     Bodies.fromVertices(
       Common.random(0, width),
@@ -82,4 +69,38 @@ Composite.add(engine.world, [
       { render: { fillStyle: "white" }, restitution: 0.6 }
     )
   ),
+];
+Composite.add(engine.world, [
+  MouseConstraint.create(engine, {
+    mouse,
+    constraint: { stiffness: 0.2, render: { visible: false } },
+  }),
+  ...[
+    [width / 2, height * 1.5, height],
+    [width * 1.5, 0, height * 4],
+    [-width * 0.5, 0, height * 4],
+  ].map(([x, y, height]) =>
+    Bodies.rectangle(x, y, width, height, {
+      isStatic: true,
+      render: { visible: false },
+      restitution: 0.6,
+    })
+  ),
+  ...interactiveBodies,
 ]);
+
+let isMouseDown = false;
+Events.on(engine, "beforeUpdate", () => {
+  render.canvas.style.cursor =
+    Query.point(interactiveBodies, mouse.position).length > 0
+      ? isMouseDown
+        ? "grabbing"
+        : "grab"
+      : "default";
+});
+render.canvas.addEventListener("mousedown", () => {
+  isMouseDown = true;
+});
+render.canvas.addEventListener("mouseup", () => {
+  isMouseDown = false;
+});
